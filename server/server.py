@@ -9,7 +9,7 @@ connection = mysql.connector.connect(
     user='admin',
     password='admin',
     port=4539,
-    database="program1"
+    database="program2"
 )
 
 cursor=connection.cursor()
@@ -27,7 +27,7 @@ async def new_connect(input_message,output_message):
             print("OK")
         else:
             print("New user")
-            command = "INSERT INTO {0} (token, name, email) VALUES (%s, %s, %s)".format("users")
+            command = "INSERT INTO {0} (token, name, email, email_password) VALUES (%s, %s, %s, %s)".format("users")
             with open("file/user_number.txt","r") as f:
                 user_number=f.read()
             token=user_number

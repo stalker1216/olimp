@@ -9,7 +9,7 @@ connection = mysql.connector.connect(
 
 cursor = connection.cursor()
 
-name_base="program1"
+name_base="program2"
 cursor.execute("DROP DATABASE IF EXISTS {0}".format(name_base))
 connection.commit()
 
@@ -22,6 +22,7 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
     id_user INT PRIMARY KEY AUTO_INCREMENT,
     token VARCHAR(16) NOT NULL,
     name VARCHAR(32) NOT NULL,
-    email VARCHAR(32) NOT NULL
+    email VARCHAR(32) NOT NULL,
+    email_password VARCHAR(32) NOT NULL
 )""".format(users))
 
