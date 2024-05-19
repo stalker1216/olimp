@@ -69,22 +69,58 @@ class Register(Screen):
     name="register"
     def __init__(self, **kw):
         super().__init__(**kw)
-        self.input_login=TextInput(hint_text="Логін",size_hint=[0.4,0.05],pos_hint={"center_x":0.5,"center_y":0.8})
+        self.lable_register=Label(font_size=30,text="Вкажіть дані для входу",size_hint=[2,1],pos_hint={"center_x":0.5,"center_y":0.94},color=[255,255,255,1])
+        self.add_widget(self.lable_register)
+        self.lable_login=Label(font_size=20,text="Вкажіть ім`я яке буде відображатися для інших користувачів",size_hint=[2,1],pos_hint={"center_x":0.5,"center_y":0.8},color=[255,255,255,1])
+        self.add_widget(self.lable_login)
+        self.input_login=TextInput(hint_text="Логін",size_hint=[0.9,0.05],pos_hint={"center_x":0.5,"center_y":0.75})
         self.add_widget(self.input_login)
-        self.log_in_button=Button(text="Вхід",size_hint=[0.3,0.1],
-        pos_hint={"center_x":0.2,"center_y":0.6},
-        font_size=options["text_size"], color=[1,1,1],
+        self.lable_password=Label(font_size=20,text="Придумайте власний пароль",size_hint=[2,1],pos_hint={"center_x":0.27,"center_y":0.65},color=[255,255,255,1])
+        self.add_widget(self.lable_password)
+        self.input_password=TextInput(hint_text="Пароль",size_hint=[0.9,0.05],pos_hint={"center_x":0.5,"center_y":0.6})
+        self.add_widget(self.input_password)
+        self.log_in_button=Button(text="Вхід в систему",size_hint=[0.4,0.1],
+        pos_hint={"center_x":0.5,"center_y":0.45},
+        font_size=30, color=[1,1,1],
         background_color=[0,0.8,255],#[50,130,180]
         on_press=self.log_in
         )
         self.add_widget(self.log_in_button)
+        self.error_input=Label(font_size=20,text="Неправильний логін чи пароль",size_hint=[2,1],pos_hint={"center_x":0.5,"center_y":0.55},color="#F52626")
+        
     def log_in(self,button):
-        global input_login_text
+        global input_login_text, input_password_text
         input_login_text=self.input_login.text
+        input_password_text=self.input_password.text
+        test_log={"name":input_login_text,"password":input_password_text}
         if not options["server_run"]:
             options["server_run"]=True
             server_thread.start()
-        self.manager.current="menu"#test
+        with open(path+"file/userdata.json","r") as f:
+            text=f.read()
+        text=json.loads(text)
+        if len(input_login_text)<=3 and len(input_password_text)<=3:
+            try:
+                self.add_widget(self.error_input)
+            except:
+                pass
+        elif len(input_login_text)>=12 and len(input_password_text)<=12:
+            try:
+                self.add_widget(self.error_input)
+            except:
+                pass
+        elif not text["name"]==test_log["name"]:
+            try:
+                self.add_widget(self.error_input)
+            except:
+                pass
+        elif not text["password"]==test_log["password"]:
+            try:
+                self.add_widget(self.error_input)
+            except:
+                pass
+        else:
+            self.manager.current="menu"#test
 
 class Menu(Screen):
     name="menu"
@@ -218,14 +254,12 @@ class Menu(Screen):
 class ProgramApp(App):
     def build(self):
         all_windows=ScreenManager(transition=WipeTransition())
-        with open(path+"file/userdata.json","r") as f:
+        """with open(path+"file/userdata.json","r") as f:
             text=f.read()
         text=json.loads(text)
         if text["action"]=="autorization":
-            text["action"]="game"
-            all_windows.add_widget(Register())
-        """with open(path+"file/userdata.json", "w") as g:
-            g.write(json.dumps(text))"""
+            text["action"]="game"""
+        all_windows.add_widget(Register())
         all_windows.add_widget(Menu())
      
         return all_windows
@@ -246,13 +280,14 @@ def start_game():
     date=obj.recv(1024)
     command=json.loads(date)
     print(json.dumps(command))
-    """with open(path+"file/userdata.json","w") as f:
-        text=f.write()"""
+    with open(path+"file/userdata.json","r") as f:
+        text=f.read()
     if command["action"]=="init":
-        text["action"]="game"
+        #text["action"]="game"
         text["token"]=command["token"]
         text["id"]=command["id"]
         text["name"]=input_login_text
+        text["password"]=input_password_text
         heapq.heappush(all_commands,(priority["init"],time.time(),command))
     """elif command["action"]=="update_resource":
         heapq.heappush(all_commands,(priority["update_resource"],time.time(),command))"""

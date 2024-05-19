@@ -21,7 +21,7 @@ users="users"
 cursor.execute("""CREATE TABLE IF NOT EXISTS {0} (
     id_user INT PRIMARY KEY AUTO_INCREMENT,
     token VARCHAR(16) NOT NULL,
-    name VARCHAR(32) NOT NULL,
-    email VARCHAR(32) NOT NULL
+    name VARCHAR(12) NOT NULL,
+    password VARCHAR(12) NOT NULL
 )""".format(users))
 
