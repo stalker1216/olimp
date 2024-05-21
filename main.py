@@ -8,6 +8,10 @@ from kivy.properties import StringProperty
 from kivy.uix.widget import Widget
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
+from kivy.uix.floatlayout import FloatLayout
+from kivy.animation import Animation
+from kivy.uix.popup import Popup
+from kivy.graphics import Color, Rectangle
 import socket
 import heapq
 import pygame
@@ -46,12 +50,6 @@ class Calendar(Screen):
     def __init__(self, **kw):
         super().__init__(**kw)
         self.add_widget(Button(text="calendar"))
-
-class Command(Screen):
-    name="command"
-    def __init__(self, **kw):
-        super().__init__(**kw)
-        self.add_widget(Button(text="command"))
 
 class Daybook(Screen):
     name="daybook"
@@ -109,7 +107,7 @@ class Register(Screen):
                 self.add_widget(self.error_input)
             except:
                 pass
-        elif not text["name"]==test_log["name"]:
+        elif not text["name"]==test_log["name"]:######################################################################################## работає з 2 раза
             try:
                 self.add_widget(self.error_input)
             except:
@@ -122,10 +120,80 @@ class Register(Screen):
         else:
             self.manager.current="menu"#test
 
+class Command(Screen):
+    name="command"
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        box=BoxLayout(orientation="vertical")
+        self.add_widget(box)
+        panel=BoxLayout(size_hint=[0.25,1])
+        box.add_widget(panel)
+
+        resource=GridLayout(size_hint=[4,1],rows=3)
+
+        self.create_button=Button(size_hint=[1,0.15],color=[1,1,1,1],text=input_name_text)#,on_press=self.create_command)
+        resource.add_widget(self.create_button)
+
+        panel.add_widget(resource)
+        
+
+class BottomPanel(BoxLayout):
+    def __init__(self, **kwargs):
+        super(BottomPanel, self).__init__(**kwargs)
+        self.orientation = 'vertical'
+        self.padding = 10
+        self.spacing = 10
+        self.size_hint_y = None
+        self.height = Window.height * 0.3
+
+        with self.canvas.before:
+            Color(1, 1, 1, 1)
+            self.rect = Rectangle(size=self.size, pos=self.pos)
+        self.bind(size=self._update_rect, pos=self._update_rect)
+
+        row=BoxLayout(orientation='horizontal', spacing=10)
+        img_button=Button(background_normal='', size_hint_x=0.1)
+        text_button=Button(text='Створити команду',background_color=[255,255,255,1],color=[0,0,0,1], size_hint_x=0.8,on_press=self.open_popup)
+        row.add_widget(img_button)
+        row.add_widget(text_button)
+        self.add_widget(row)
+
+        row1=BoxLayout(orientation='horizontal', spacing=10)
+        img_button1=Button(background_normal='', size_hint_x=0.1)
+        text_button1=Button(text='a',background_color=[255,255,255,1],color=[0,0,0,1], size_hint_x=0.8)
+        row1.add_widget(img_button1)
+        row1.add_widget(text_button1)
+        self.add_widget(row1)
+
+        row2=BoxLayout(orientation='horizontal', spacing=10)
+        img_button2=Button(background_normal='', size_hint_x=0.1)
+        text_button2=Button(text='a',background_color=[255,255,255,1],color=[0,0,0,1], size_hint_x=0.8)
+        row2.add_widget(img_button2)
+        row2.add_widget(text_button2)
+        self.add_widget(row2)
+        
+    def open_popup(self, button):
+        global  input_name_text
+        popup_content = BoxLayout(orientation='vertical')
+        self.lable_register=Label(font_size=15,text="Ім`я команди",size_hint=[1,0.01],pos_hint={"center_x":0.1,"center_y":1},color=[1,1,1,1])
+        self.input_name=TextInput(hint_text="Допустимі букви, цифри і пробіли",size_hint=[1,0.05])
+        self.create_button_popup=Button(size_hint=[1,0.15],background_color=[255,255,255,1],color=[0,0,0,1],text="Створити",font_size=options['text_size']*0.3)
+        popup_content.add_widget(self.lable_register)
+        popup_content.add_widget(self.input_name)
+        popup_content.add_widget(self.create_button_popup)
+        input_name_text=self.input_name.text
+        popup = Popup(title='Створити команду', content=popup_content, size_hint=(None, None), size=(500, 600))#655, 960
+        popup.open()
+
+    def _update_rect(self, instance, value):
+        self.rect.size = instance.size
+        self.rect.pos = instance.pos
+
 class Menu(Screen):
     name="menu"
     def __init__(self, **kw):
         super().__init__(**kw)
+        
 
         box=BoxLayout(orientation="vertical")
         self.add_widget(box)
@@ -161,6 +229,7 @@ class Menu(Screen):
         self.go_command_button=Button(size_hint=[1,1],background_normal=path+"sprites/3.png",background_down=path+"sprites/3.png",color=[0,0,0,1],on_press=self.go_command)
         command_box.add_widget(self.go_command_button)
         self.people_text=Button(size_hint=[1,0.15],background_color=[255,255,255,1],color=[0,0,0,1],text="Команди",bold=True,font_size=options['text_size']*0.3)
+        self.go_command_button.bind(on_release=self.toggle_panel)
         command_box.add_widget(self.people_text)
         screen_button.add_widget(command_box)
 
@@ -180,18 +249,40 @@ class Menu(Screen):
 
         panel.add_widget(screen_button)
 
+        self.layout=FloatLayout()
+        self.add_widget(self.layout)
+
+        self.bottom_panel=BottomPanel(size_hint=(1, 0.3), pos_hint={'x': 0, 'y': -0.3})
+        self.layout.add_widget(self.bottom_panel)
+
+        self.overlay_button = Button(size_hint=(1, 0.8),pos_hint={"center_x":0.5,"center_y":0.6}, background_color=(0, 0, 0, 0))
+        self.overlay_button.bind(on_release=self.toggle_panel)
+        self.overlay_button.opacity = 0
+
+    def toggle_panel(self, button):
+        if self.bottom_panel.pos_hint['y'] == -0.3:
+            anim = Animation(pos_hint={'x': 0, 'y': 0}, duration=0.3)
+            self.overlay_button.opacity = 0.5  
+        else:
+            anim = Animation(pos_hint={'x': 0, 'y': -0.3}, duration=0.3)
+            self.overlay_button.opacity = 0 
+            self.layout.remove_widget(self.overlay_button)
+        anim.start(self.bottom_panel)
+
     def go_task(self,button):
         self.all_game_screen.current="task"
     def go_calendar(self,button):
         self.all_game_screen.current="calendar"
     def go_command(self,button):
         self.all_game_screen.current="command"
+        try:
+            self.layout.add_widget(self.overlay_button)
+        except:
+            pass
     def go_daybook(self,button):
         self.all_game_screen.current="daybook"
     def go_chat(self,button):
         self.all_game_screen.current="chat"
-
-        
 
 """class StartMenu(Screen):
     def __init__(self, **kw):
@@ -259,7 +350,7 @@ class ProgramApp(App):
         text=json.loads(text)
         if text["action"]=="autorization":
             text["action"]="game"""
-        all_windows.add_widget(Register())
+        #all_windows.add_widget(Register())
         all_windows.add_widget(Menu())
      
         return all_windows
@@ -280,8 +371,6 @@ def start_game():
     date=obj.recv(1024)
     command=json.loads(date)
     print(json.dumps(command))
-    with open(path+"file/userdata.json","r") as f:
-        text=f.read()
     if command["action"]=="init":
         #text["action"]="game"
         text["token"]=command["token"]
