@@ -12,6 +12,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.animation import Animation
 from kivy.uix.popup import Popup
 from kivy.graphics import Color, Rectangle
+from kivy.clock import Clock
 import socket
 import heapq
 import pygame
@@ -131,12 +132,15 @@ class Command(Screen):
 
         resource=GridLayout(size_hint=[4,1],rows=3)
 
-        self.create_button=Button(size_hint=[1,0.15],color=[1,1,1,1],text=input_name_text)#,on_press=self.create_command)
+        self.create_button=Button(size_hint=[1,0.15],color=[1,1,1,1],text='',on_press=self.create_test)
         resource.add_widget(self.create_button)
 
         panel.add_widget(resource)
+        #Clock.schedule_interval(self.update,1/60)
+    
+    def create_test(self,button):
+        self.create_button.text=global_input_name
         
-
 class BottomPanel(BoxLayout):
     def __init__(self, **kwargs):
         super(BottomPanel, self).__init__(**kwargs)
@@ -173,21 +177,23 @@ class BottomPanel(BoxLayout):
         self.add_widget(row2)
         
     def open_popup(self, button):
-        global  input_name_text
         popup_content = BoxLayout(orientation='vertical')
         self.lable_register=Label(font_size=15,text="Ім`я команди",size_hint=[1,0.01],pos_hint={"center_x":0.1,"center_y":1},color=[1,1,1,1])
         self.input_name=TextInput(hint_text="Допустимі букви, цифри і пробіли",size_hint=[1,0.05])
-        self.create_button_popup=Button(size_hint=[1,0.15],background_color=[255,255,255,1],color=[0,0,0,1],text="Створити",font_size=options['text_size']*0.3)
+        self.create_button_popup=Button(size_hint=[1,0.15],background_color=[255,255,255,1],color=[0,0,0,1],text="Створити",font_size=options['text_size']*0.3,on_press=self.save_text)
         popup_content.add_widget(self.lable_register)
         popup_content.add_widget(self.input_name)
         popup_content.add_widget(self.create_button_popup)
-        input_name_text=self.input_name.text
         popup = Popup(title='Створити команду', content=popup_content, size_hint=(None, None), size=(500, 600))#655, 960
         popup.open()
 
     def _update_rect(self, instance, value):
         self.rect.size = instance.size
         self.rect.pos = instance.pos
+    
+    def save_text(self, button):
+        global global_input_name
+        global_input_name=self.input_name.text
 
 class Menu(Screen):
     name="menu"
