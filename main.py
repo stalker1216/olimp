@@ -4,7 +4,6 @@ from kivy.uix.button import Button
 from kivy.core.window import Window
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import StringProperty
 from kivy.uix.widget import Widget
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput
@@ -125,22 +124,61 @@ class Command(Screen):
     name="command"
     def __init__(self, **kw):
         super().__init__(**kw)
+
         box=BoxLayout(orientation="vertical")
         self.add_widget(box)
         panel=BoxLayout(size_hint=[0.25,1])
         box.add_widget(panel)
 
-        resource=GridLayout(size_hint=[4,1],rows=3)
+        self.resource=GridLayout(size_hint=[4,1],cols=1)
 
-        self.create_button=Button(size_hint=[1,0.15],color=[1,1,1,1],text='',on_press=self.create_test)
-        resource.add_widget(self.create_button)
+        self.create_button=Button(size_hint=[1,0.15],background_color=[255,255,255,1],color=[255,255,255,1],text='',on_press=self.create_test)
+        self.resource.add_widget(self.create_button)
 
-        panel.add_widget(resource)
-        #Clock.schedule_interval(self.update,1/60)
+        panel.add_widget(self.resource)
+
+        Clock.schedule_interval(self.update,1/2)
     
+    def update(self,button):
+        try:
+            self.create_button.text=global_input_name
+        except:
+            pass
+
     def create_test(self,button):
-        self.create_button.text=global_input_name
-        
+        self.create_button=Button(size_hint=[1,0.15],color=[255,255,255,1],text=global_input_name,on_press=self.actions_create_button)
+        self.resource.add_widget(self.create_button)
+
+    def actions_create_button(self,button):
+        self.manager.current="new_command"
+    
+class NewCommand(Screen):
+    name="new_command"
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        box=BoxLayout(orientation="vertical")
+        self.add_widget(box)
+        panel=BoxLayout(size_hint=[0.25,1])
+        box.add_widget(panel)
+
+        self.exit_command_button=Button(size_hint=[0.3,1],background_color=[255,255,255,1],color=[255,255,255,1],text='exit',on_press=self.exit_command)
+        panel.add_widget(self.exit_command_button)
+
+        self.lable_name=Label(font_size=15,text="name",size_hint=[0.7,1],color=[1,1,1,1])
+        panel.add_widget(self.lable_name)
+
+        self.settings_command_button=Button(size_hint=[0.3,1],background_color=[255,255,255,1],color=[255,255,255,1],text='settings',on_press=self.settings_command)
+        panel.add_widget(self.settings_command_button)
+
+        """message_box=GridLayout(size_hint=[4,1],cols=2)
+        panel.add_widget(message_box)"""
+
+    def exit_command(self,button):
+        self.manager.current="command"
+
+    def settings_command(self,button):
+        pass
+
 class BottomPanel(BoxLayout):
     def __init__(self, **kwargs):
         super(BottomPanel, self).__init__(**kwargs)
@@ -175,7 +213,7 @@ class BottomPanel(BoxLayout):
         row2.add_widget(img_button2)
         row2.add_widget(text_button2)
         self.add_widget(row2)
-        
+
     def open_popup(self, button):
         popup_content = BoxLayout(orientation='vertical')
         self.lable_register=Label(font_size=15,text="Ім`я команди",size_hint=[1,0.01],pos_hint={"center_x":0.1,"center_y":1},color=[1,1,1,1])
@@ -212,6 +250,7 @@ class Menu(Screen):
         self.all_game_screen.add_widget(Command())
         self.all_game_screen.add_widget(Daybook())
         self.all_game_screen.add_widget(Chat())
+        self.all_game_screen.add_widget(NewCommand())
         box.add_widget(self.all_game_screen)
 
         panel=BoxLayout(size_hint=[1,0.2])
