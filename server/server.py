@@ -20,12 +20,43 @@ async def new_connect(input_message,output_message):
     data=data.decode("utf-8")
     
     command=json.loads(data)
+    all_invite_tokens=[]
+    all_invite_tokens.append(command["invite_token"])
+    all_command_tekens=[]
+    all_command_tekens.append(command["command_token"])
+    
     if command["action"]=="autorization":
         print(command["token"])
         with open("file/token.txt","r") as f:
             all_token=f.readlines()
-        if command["token"]+"\n" in all_token:
+
+        
+        for i in range(len(all_command_tekens)):
+     
+            print("err1")
+            create_command=f"create_command{i}"
+            cursor.execute(f"""CREATE TABLE IF NOT EXISTS {create_command} (
+                id_command INT PRIMARY KEY AUTO_INCREMENT,
+                command_token VARCHAR(16) NOT NULL,
+                command_name VARCHAR(255) NOT NULL
+            )""")#.format(create_command))
+            
+        
+
+        for i in range(len(all_invite_tokens)):
+
+            column_name=f"token{i}"
+            try:
+                cursor.execute(f"""
+                    ALTER TABLE {create_command} 
+                    ADD COLUMN {column_name} VARCHAR(16)
+                """)
+                
+            except mysql.connector.Error as err:
+                print(f"Error: {err}")
+        if command["token"]+"\n" in all_token:         
             print("OK")
+            
         else:
             print("New user")
             command = "INSERT INTO {0} (token, name, password) VALUES (%s, %s, %s)".format("users")
@@ -35,7 +66,9 @@ async def new_connect(input_message,output_message):
             for i in range(16-len(user_number)):
                 token=token+chr(int(str(time.time())[-1::])+random.randint(97,113))
             data2 = (token, "user", "")
+            print("err1")
             cursor.execute(command, data2)
+            print("err2")
             #user_id=cursor.lastrowid # отримаэмо id щойноствореного користувача
             with open("file/user_number.txt","w") as f:
                 f.write(str(int(user_number)+1))

@@ -12,6 +12,7 @@ from kivy.animation import Animation
 from kivy.uix.popup import Popup
 from kivy.graphics import Color, Rectangle
 from kivy.clock import Clock
+import random
 import socket
 import heapq
 import pygame
@@ -102,7 +103,7 @@ class Register(Screen):
                 self.add_widget(self.error_input)
             except:
                 pass
-        elif len(input_login_text)>=12 and len(input_password_text)<=12:
+        elif len(input_login_text)>=12 and len(input_password_text)<=12:###########################################><
             try:
                 self.add_widget(self.error_input)
             except:
@@ -132,8 +133,8 @@ class Command(Screen):
 
         self.resource=GridLayout(size_hint=[4,1],cols=1)
 
-        self.create_button=Button(size_hint=[1,0.15],background_color=[255,255,255,1],color=[255,255,255,1],text='',on_press=self.create_test)
-        self.resource.add_widget(self.create_button)
+        """self.create_button=Button(size_hint=[1,0.15],background_color=[255,255,255,1],color=[255,255,255,1],text='',on_press=self.create_test)
+        self.resource.add_widget(self.create_button)"""
 
         panel.add_widget(self.resource)
 
@@ -141,16 +142,27 @@ class Command(Screen):
     
     def update(self,button):
         try:
-            self.create_button.text=global_input_name
+            #self.create_button.text=global_input_name
+            self.create_button=Button(size_hint=[1,0.15],background_color=[255,255,255,1],color=[255,255,255,1],text=global_input_name[-1],on_press=self.actions_create_button)
+            self.resource.add_widget(self.create_button)
+            global_input_name[-1]=None
         except:
             pass
+        
 
-    def create_test(self,button):
-        self.create_button=Button(size_hint=[1,0.15],color=[255,255,255,1],text=global_input_name,on_press=self.actions_create_button)
-        self.resource.add_widget(self.create_button)
+    #def create_test(self,button):
+        
+        #global_input_name=""
 
     def actions_create_button(self,button):
+        global command_token
         self.manager.current="new_command"
+        """for i in range(len(global_input_name)):
+            print(1)
+            screen = NewCommand(name=f'Screen {i}')"""
+        command_token=""
+        for i in range(16):
+            command_token+=chr(int(str(time.time())[-1::])+random.randint(97,113))
     
 class NewCommand(Screen):
     name="new_command"
@@ -158,23 +170,37 @@ class NewCommand(Screen):
         super().__init__(**kw)
         box=BoxLayout(orientation="vertical")
         self.add_widget(box)
-        panel=BoxLayout(size_hint=[0.25,1])
-        box.add_widget(panel)
+        """panel=BoxLayout(size_hint=[0.25,1])
+        box.add_widget(panel)"""
 
-        self.exit_command_button=Button(size_hint=[0.3,1],background_color=[255,255,255,1],color=[255,255,255,1],text='exit',on_press=self.exit_command)
-        panel.add_widget(self.exit_command_button)
+        self.input_invite_token=TextInput(hint_text="token",size_hint=[1,0.05])
+        box.add_widget(self.input_invite_token)
 
-        self.lable_name=Label(font_size=15,text="name",size_hint=[0.7,1],color=[1,1,1,1])
-        panel.add_widget(self.lable_name)
 
-        self.settings_command_button=Button(size_hint=[0.3,1],background_color=[255,255,255,1],color=[255,255,255,1],text='settings',on_press=self.settings_command)
-        panel.add_widget(self.settings_command_button)
+        self.enter_token_button=Button(size_hint=[0.3,1],background_color=[255,255,255,1],color=[255,255,255,1],text='add',on_press=self.save_token)
+        box.add_widget(self.enter_token_button)
 
-        """message_box=GridLayout(size_hint=[4,1],cols=2)
-        panel.add_widget(message_box)"""
+        #self.exit_command_button=Button(size_hint=[0.3,1],background_color=[255,255,255,1],color=[255,255,255,1],text='exit',on_press=self.exit_command)
+        #panel.add_widget(self.exit_command_button)
 
-    def exit_command(self,button):
-        self.manager.current="command"
+        
+
+        """self.settings_command_button=Button(size_hint=[0.3,1],background_color=[255,255,255,1],color=[255,255,255,1],text='settings',on_press=self.settings_command)
+        panel.add_widget(self.settings_command_button)"""
+
+
+    def save_token(self,button):
+        with open(path+"file/userdata.json","r") as f:
+            text=f.read()#ijahniahibhauwbu
+        text=json.loads(text)
+        text["invite_token"]=self.input_invite_token.text
+        text["command_token"]=command_token
+        text["command_name"]=global_save_name[-1]
+        with open(path+"file/userdata.json", "w") as g:
+            g.write(json.dumps(text))
+            print(text)
+        self.input_invite_token.text=""
+        
 
     def settings_command(self,button):
         pass
@@ -219,6 +245,7 @@ class BottomPanel(BoxLayout):
         self.lable_register=Label(font_size=15,text="Ім`я команди",size_hint=[1,0.01],pos_hint={"center_x":0.1,"center_y":1},color=[1,1,1,1])
         self.input_name=TextInput(hint_text="Допустимі букви, цифри і пробіли",size_hint=[1,0.05])
         self.create_button_popup=Button(size_hint=[1,0.15],background_color=[255,255,255,1],color=[0,0,0,1],text="Створити",font_size=options['text_size']*0.3,on_press=self.save_text)
+        #self.create_button_popup.bind(on_release=self.global_create_test)
         popup_content.add_widget(self.lable_register)
         popup_content.add_widget(self.input_name)
         popup_content.add_widget(self.create_button_popup)
@@ -230,8 +257,12 @@ class BottomPanel(BoxLayout):
         self.rect.pos = instance.pos
     
     def save_text(self, button):
-        global global_input_name
-        global_input_name=self.input_name.text
+        global global_input_name,global_save_name
+        global_input_name=[]
+        global_input_name.append(self.input_name.text)
+        global_save_name=[]
+        global_save_name.append(self.input_name.text)
+        self.input_name.text=""
 
 class Menu(Screen):
     name="menu"
@@ -241,8 +272,14 @@ class Menu(Screen):
 
         box=BoxLayout(orientation="vertical")
         self.add_widget(box)
+
+        up_panel=BoxLayout(orientation="vertical",size_hint=[1,0.1])
+        box.add_widget(up_panel)
         
         screen_button=GridLayout(size_hint=[4,1],cols=7)
+
+        self.open_bottompanel=Button(size_hint=[0.1,0.1],background_color=[255,255,255,1],color=[0,0,0,1],text="відкрити",on_press=self.toggle_panel)
+        up_panel.add_widget(self.open_bottompanel)
 
         self.all_game_screen=ScreenManager(transition=SwapTransition(),size_hint=[4,1])
         self.all_game_screen.add_widget(Task())
@@ -274,7 +311,7 @@ class Menu(Screen):
         self.go_command_button=Button(size_hint=[1,1],background_normal=path+"sprites/3.png",background_down=path+"sprites/3.png",color=[0,0,0,1],on_press=self.go_command)
         command_box.add_widget(self.go_command_button)
         self.people_text=Button(size_hint=[1,0.15],background_color=[255,255,255,1],color=[0,0,0,1],text="Команди",bold=True,font_size=options['text_size']*0.3)
-        self.go_command_button.bind(on_release=self.toggle_panel)
+        #self.go_command_button.bind(on_release=self.toggle_panel)
         command_box.add_widget(self.people_text)
         screen_button.add_widget(command_box)
 
@@ -303,8 +340,14 @@ class Menu(Screen):
         self.overlay_button = Button(size_hint=(1, 0.8),pos_hint={"center_x":0.5,"center_y":0.6}, background_color=(0, 0, 0, 0))
         self.overlay_button.bind(on_release=self.toggle_panel)
         self.overlay_button.opacity = 0
+     
+        
 
     def toggle_panel(self, button):
+        try:
+            self.layout.add_widget(self.overlay_button)
+        except:
+            pass
         if self.bottom_panel.pos_hint['y'] == -0.3:
             anim = Animation(pos_hint={'x': 0, 'y': 0}, duration=0.3)
             self.overlay_button.opacity = 0.5  
@@ -320,10 +363,6 @@ class Menu(Screen):
         self.all_game_screen.current="calendar"
     def go_command(self,button):
         self.all_game_screen.current="command"
-        try:
-            self.layout.add_widget(self.overlay_button)
-        except:
-            pass
     def go_daybook(self,button):
         self.all_game_screen.current="daybook"
     def go_chat(self,button):
@@ -395,16 +434,17 @@ class ProgramApp(App):
         text=json.loads(text)
         if text["action"]=="autorization":
             text["action"]="game"""
-        #all_windows.add_widget(Register())
+        all_windows.add_widget(Register())
         all_windows.add_widget(Menu())
      
         return all_windows
 
 def start_game(): 
+    global obj
     obj=socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
     while True:
         try:
-            obj.connect(("192.168.56.1",3945))#miha01lojb@gmail.com
+            obj.connect(("192.168.56.1",3945))
             break
         except:
             pass
@@ -428,10 +468,15 @@ def start_game():
     #all_commands.update(command)
     with open(path+"file/userdata.json", "w") as g:
         g.write(json.dumps(text))
+        print(text)
     #print(date.decode("utf-8"))
     obj.close()
 
 server_thread=threading.Thread(target=start_game)
+
+"""if not options["server_run"]:#############################test
+    options["server_run"]=True
+    server_thread.start()"""
 
 if __name__=="__main__":
     ProgramApp().run()
