@@ -1,4 +1,4 @@
-from kivy.app import App
+﻿from kivy.app import App
 from kivy.uix.screenmanager import Screen, ScreenManager, WipeTransition, SlideTransition, SwapTransition
 from kivy.uix.button import Button
 from kivy.core.window import Window
@@ -444,7 +444,7 @@ def start_game():
     obj=socket.socket(socket.AF_INET,socket.SOCK_STREAM) 
     while True:
         try:
-            obj.connect(("192.168.56.1",3945))
+            obj.connect(("134.249.176.108",2024))
             break
         except:
             pass

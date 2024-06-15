@@ -1,4 +1,4 @@
-import mysql.connector
+﻿import mysql.connector
 import asyncio
 import json
 import time
@@ -6,9 +6,9 @@ import random
 
 connection = mysql.connector.connect(
     host='localhost', 
-    user='admin',
-    password='admin',
-    port=4539,
+    user='root',
+    password='root',
+    port=2023,
     database="program3"
 )
 
@@ -81,7 +81,7 @@ async def new_connect(input_message,output_message):
             print("New user1")
 
 async def main():
-    server = await asyncio.start_server(new_connect,"192.168.56.1",3945)
+    server = await asyncio.start_server(new_connect,"134.249.176.108",2024)
     async with server:
         await server.serve_forever()
 if __name__=="__main__":
