@@ -113,17 +113,26 @@ class Register(Screen):
         with open(os.path.join(local_path,"userdata.json"),"r") as f:
             text=f.read()
         text=json.loads(text)
-        if len(input_login_text)<=3 and len(input_password_text)<=3:
+        if len(input_login_text)<=3:
             try:
                 self.add_widget(self.error_input)
             except:
                 pass
-        elif len(input_login_text)>=12 and len(input_password_text)>=12:###########################################><
+        elif len(input_password_text)<=3:
             try:
                 self.add_widget(self.error_input)
             except:
                 pass
-        
+        elif len(input_login_text)>=12:
+            try:
+                self.add_widget(self.error_input)
+            except:
+                pass
+        elif len(input_password_text)>=12:
+            try:
+                self.add_widget(self.error_input)
+            except:
+                pass
         else:
             self.manager.current="menu"#test
 """elif not text["name"]==test_log["name"]:######################################################################################## работає з 2 раза
