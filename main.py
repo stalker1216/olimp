@@ -198,7 +198,6 @@ class NewCommand(Screen):
         text["command_name"]=global_save_name[-1]
         with open(path+"file/userdata.json", "w") as g:
             g.write(json.dumps(text))
-            print(text)
         self.input_invite_token.text=""
         
 
@@ -455,7 +454,6 @@ def start_game():
     text=json.loads(text)
     date=obj.recv(1024)
     command=json.loads(date)
-    print(json.dumps(command))
     if command["action"]=="init":
         #text["action"]="game"
         text["token"]=command["token"]
@@ -468,7 +466,6 @@ def start_game():
     #all_commands.update(command)
     with open(path+"file/userdata.json", "w") as g:
         g.write(json.dumps(text))
-        print(text)
     #print(date.decode("utf-8"))
     obj.close()
 
