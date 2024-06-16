@@ -1,4 +1,4 @@
-﻿import mysql.connector
+import mysql.connector
 import asyncio
 import json
 import time
@@ -33,7 +33,6 @@ async def new_connect(input_message,output_message):
         
         for i in range(len(all_command_tekens)):
      
-            print("err1")
             create_command=f"create_command{i}"
             cursor.execute(f"""CREATE TABLE IF NOT EXISTS {create_command} (
                 id_command INT PRIMARY KEY AUTO_INCREMENT,

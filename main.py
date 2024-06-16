@@ -12,6 +12,7 @@ from kivy.animation import Animation
 from kivy.uix.popup import Popup
 from kivy.graphics import Color, Rectangle
 from kivy.clock import Clock
+from kivy import platform
 import random
 import socket
 import heapq
@@ -22,23 +23,37 @@ import threading
 import os
 import time
 
-path=os.path.abspath('')+'/'
+path=''
+
+if platform == 'win':  
+    local_path = os.path.join(os.environ['LOCALAPPDATA'],'civa')
 
 w,h=pygame.display.Info().current_w,pygame.display.Info().current_h
 Window.size=[w/3,h/5*4]
 Window.left=w//2-Window.size[0]//2
 Window.top=h//2.5-Window.size[1]//2
 
+if not os.path.exists(local_path): 
+    os.makedirs(local_path) 
+if not os.path.exists(os.path.join(local_path,"options.json")): 
+    options={"font": "font/7fonts_Knight2.ttf", "text_size": 45, "server_run":False} 
+    options["text_size"]=int((max(w,h)//40)*1.2)
+    open(os.path.join(local_path,"options.json"),"w").write(json.dumps(options))
+    print(1)
+else: 
+    options=json.loads(open(os.path.join(local_path,"options.json"),"r").read()) 
+if not os.path.exists(os.path.join(local_path,"userdata.json")): 
+    userdata={"action": "autorization", "token": "", "id": 0, "name": "", "password": "", "invite_token": "", "command_token": "", "command_name": ""}
+    open(os.path.join(local_path,"userdata.json"),"w").write(json.dumps(userdata))
+    print(2)
+else: 
+    userdata=json.loads(open(os.path.join(local_path,"userdata.json"),"r").read()) 
+    
 all_commands=[]
 priority={"init":0,
           "donate":0,
           "update_resource":0}
 
-
-file=open(path+"file/options.json","r")
-options=json.loads(file.read())
-options["text_size"]=Window.size[0]/13
-options["server_run"]=False
 
 class Task(Screen):
     name="task"
@@ -95,7 +110,7 @@ class Register(Screen):
         if not options["server_run"]:
             options["server_run"]=True
             server_thread.start()
-        with open(path+"file/userdata.json","r") as f:
+        with open(os.path.join(local_path,"userdata.json"),"r") as f:
             text=f.read()
         text=json.loads(text)
         if len(input_login_text)<=3 and len(input_password_text)<=3:
@@ -103,12 +118,15 @@ class Register(Screen):
                 self.add_widget(self.error_input)
             except:
                 pass
-        elif len(input_login_text)>=12 and len(input_password_text)<=12:###########################################><
+        elif len(input_login_text)>=12 and len(input_password_text)>=12:###########################################><
             try:
                 self.add_widget(self.error_input)
             except:
                 pass
-        elif not text["name"]==test_log["name"]:######################################################################################## работає з 2 раза
+        
+        else:
+            self.manager.current="menu"#test
+"""elif not text["name"]==test_log["name"]:######################################################################################## работає з 2 раза
             try:
                 self.add_widget(self.error_input)
             except:
@@ -117,10 +135,7 @@ class Register(Screen):
             try:
                 self.add_widget(self.error_input)
             except:
-                pass
-        else:
-            self.manager.current="menu"#test
-
+                pass"""
 class Command(Screen):
     name="command"
     def __init__(self, **kw):
@@ -447,7 +462,7 @@ def start_game():
             break
         except:
             pass
-    with open(path+"file/userdata.json","r") as f:
+    with open(os.path.join(local_path,"userdata.json"),"r") as f:
         text=f.read()
     #text="token ({0})".format(text)
     obj.sendall(text.encode("utf-8"))
@@ -464,7 +479,7 @@ def start_game():
     """elif command["action"]=="update_resource":
         heapq.heappush(all_commands,(priority["update_resource"],time.time(),command))"""
     #all_commands.update(command)
-    with open(path+"file/userdata.json", "w") as g:
+    with open(os.path.join(local_path,"userdata.json"),"w") as g:
         g.write(json.dumps(text))
     #print(date.decode("utf-8"))
     obj.close()
